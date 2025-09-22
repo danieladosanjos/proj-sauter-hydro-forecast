@@ -27,3 +27,13 @@ output "cloud_run_sa_email" {
   description = "Email do service account do Cloud Run"
   value       = google_service_account.cloud_run_sa.email
 }
+
+output "workload_identity_provider" {
+  description = "Workload Identity Provider"
+  value       = google_iam_workload_identity_pool_provider.github_provider.name
+}
+
+output "terraform_sa_email" {
+  description = "Email do service account do Terraform"
+  value       = google_service_account.terraform_sa.email
+}
