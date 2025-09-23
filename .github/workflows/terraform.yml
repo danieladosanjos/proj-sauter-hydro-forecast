@@ -1,3 +1,5 @@
+
+
 name: 'Terraform Deploy'
 
 on:
@@ -19,33 +21,34 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     
+    # Define o diretório padrão para todos os comandos de 'run'
+    defaults:
+      run:
+        working-directory: ./terraform
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: 'google-github-actions/auth@v2'
       with:
-        workload_identity_provider: 'projects/83962744306/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
-        service_account: 'terraform-sa@affable-elf-472819-k2.iam.gserviceaccount.com'
+               workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
         
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.13.3
+         Terraform
+        terraform_version: 1.9.0
         
     - name: Terraform Init
-      run: |
-        cd terraform
-        terraform init
+      run: terraform init
         
     - name: Terraform Plan
-      run: |
-        cd terraform
-        terraform plan
+      run: terraform plan
         
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
-      run: |
-        cd terraform
-        terraform apply -auto-approve
+      
+      run: terraform apply -auto-approve
