@@ -17,11 +17,14 @@ variable "zone" {
 }
 
 variable "mentor_emails" {
-  description = "Emails dos mentores para alertas"
+  description = "Emails para alertas"
   type        = list(string)
   default     = [
-    "mentor1@exemplo.com",
-    "mentor2@exemplo.com", 
-    "mentor3@exemplo.com"
+    "academicosdani@gmail.com",
+    "raulzc00@gmail.com", 
+    "genarioazevedo@gmail.com",
+    "mvenicio141@gmail.com",
+    "psi.genarioazevedo@gmail.com",
+    "steniomedeiro85@gmail.com"
   ]
 }

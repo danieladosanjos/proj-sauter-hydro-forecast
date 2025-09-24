@@ -37,3 +37,7 @@ output "terraform_sa_email" {
   description = "Email do service account do Terraform"
   value       = google_service_account.terraform_sa.email
 }
+output "api_service_url" {
+  description = "URL da API no Cloud Run"
+  value       = google_cloud_run_v2_service.api_service.uri
+}
