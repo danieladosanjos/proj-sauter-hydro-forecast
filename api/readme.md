@@ -22,6 +22,12 @@ Este projeto consiste em uma API desenvolvida em Python com FastAPI, projetada p
 
 ## Configuração
 
+### Endpoints da API no Cloud Run
+
+https://api-processamento-ons-83962744306.us-central1.run.app/consultar
+
+https://api-processamento-ons-83962744306.us-central1.run.app/processar
+
 ### Variáveis de Ambiente
 
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
@@ -91,6 +97,12 @@ Consulta dados históricos no BigQuery por intervalo de datas com paginação.
 ```bash
 curl "http://localhost:8080/consultar?data_inicio=2023-01-01&data_fim=2023-12-31&pagina=1&tamanho=50"
 ```
+ou
+
+```bash
+curl "https://api-processamento-ons-83962744306.us-central1.run.app/consultar?data_inicio=2023-01-01&data_fim=2023-12-31&pagina=1&tamanho=50"
+```
+
 
 ### Processar Dados da ONS
 ```
@@ -114,6 +126,13 @@ Baixa e processa dados do portal da ONS para o período especificado.
 **Exemplo:**
 ```bash
 curl -X POST "http://localhost:8080/processar?pagina=1&tamanho=100" \
+  -H "Content-Type: application/json" \
+  -d '{"data_inicio": "2023-01-01", "data_fim": "2023-12-31"}'
+```
+ou
+
+```bash
+curl "https://api-processamento-ons-83962744306.us-central1.run.app/processar" \
   -H "Content-Type: application/json" \
   -d '{"data_inicio": "2023-01-01", "data_fim": "2023-12-31"}'
 ```
@@ -161,7 +180,11 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8080
 
 Após iniciar a aplicação, acesse:
 - Swagger UI: `http://localhost:8080/docs`
+ou
+- Swagger UI: https://api-processamento-ons-83962744306.us-central1.run.app/docs
 - ReDoc: `http://localhost:8080/redoc`
+ou
+- Swagger UI: https://api-processamento-ons-83962744306.us-central1.run.app/redoc
 
 ## Monitoramento
 
