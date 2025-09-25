@@ -1,10 +1,14 @@
 
 # Documentação do Projeto: Pipeline de Processamento de Dados ENA (Energia Natural Afluente)
 
+# 📊 Projeto: Sauter University 2025 Challenge
+**Autor:** *Genário Correia de Azevedo*  
+**Função:** Engenharia de Dados  
+
 ## 1. Introdução
 
 ### 1.1. Visão Geral do Projeto
-Este documento detalha o projeto de pipeline de dados para o processamento de informações sobre Energia Natural Afluente (ENA), desenvolvido como parte do **Sauter University 2025 Challenge**. O projeto foi concebido e implementado por *Genário Correia de Azevedo,* atuando como engenheiro de dados, com foco na utilização de ferramentas nativas do Google Cloud Platform (GCP). O objetivo principal é estabelecer um fluxo ETL (Extract, Transform, Load) robusto, escalável e economicamente eficiente para a ingestão, validação, transformação e armazenamento de dados brutos de ENA em um formato confiável (trusted). A arquitetura emprega o Google Cloud Storage (GCS) para armazenamento de dados brutos em formato Parquet, o BigQuery para processamento e armazenamento de dados estruturados, e o Cloud Functions para orquestração e automação do pipeline. Esta abordagem visa garantir a conformidade com as melhores práticas de Engenharia de Dados, incluindo particionamento de dados para otimização de consultas e a implementação de operações de upsert para manter a integridade e a atualidade dos dados.
+Este documento detalha o projeto de pipeline de dados para o processamento de informações sobre Energia Natural Afluente (ENA), desenvolvido como parte do **Sauter University 2025 Challenge**. 
 
 ## 2. Arquitetura Geral
 
@@ -31,10 +35,6 @@ A arquitetura proposta para o pipeline de dados ENA oferece uma série de benef�
 *   **Segurança**: O GCP oferece recursos de segurança robustos. O acesso aos recursos é controlado por meio de IAM (Identity and Access Management) roles, garantindo que apenas usuários e serviços autorizados possam interagir com os dados e as funções. Além disso, os dados armazenados no GCS e BigQuery são criptografados por padrão, tanto em trânsito quanto em repouso.
 *   **Integração Nativa**: A utilização de ferramentas nativas do GCP (GCS, BigQuery, Cloud Functions) simplifica a integração entre os componentes, reduzindo a complexidade de desenvolvimento e o overhead de manutenção. Isso permite que a equipe se concentre na lógica de negócio e na qualidade dos dados, em vez de gerenciar a infraestrutura subjacente.
 *   **Resiliência e Alta Disponibilidade**: Os serviços do GCP são projetados para alta disponibilidade e resiliência, com redundância em várias regiões e zonas de disponibilidade, minimizando o risco de interrupções no pipeline de dados.
-
-
-
-
 
 ## 3. Detalhamento dos Componentes
 
