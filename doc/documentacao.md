@@ -564,5 +564,122 @@ df.to_csv('ena_trusted_cleaned_final.csv', index=False)
 
 ## 🚀 Conclusão
 Minha participação como **Analista de Dados** foi essencial para **transformar dados brutos do ONS em informação estratégica**, integrando a pipeline de ponta a ponta, desde ingestão até visualização no Looker Studio.  
+---
+
+
+
+# Documentação do Projeto: Pipeline de treinamento 
+
+# 📊 Projeto: Sauter University 2025 Challenge
+
+  
+
+**Autor:** Stênio Medeiros Freitas  
+**Função:** Engenharia Machine Learning  
+
+---
+
+## 1. Introdução
+
+O Jupyter Notebook implementa um pipeline completo de Machine Learning (ML) e Análise de Séries Temporais para prever o Percentual de Energia Armazenada em Reservatórios (EARpercentual).  
+
+O projeto utiliza dados históricos diários fornecidos pelo **Operador Nacional do Sistema Elétrico (ONS)**, cobrindo o período de **2000 a 2025**.  
+
+O fluxo de trabalho é estruturado em três macroetapas:  
+
+1. Coleta e Pré-Processamento  
+2. Análise de Séries Temporais Estatísticas  
+3. Modelagem Preditiva (LightGBM)  
+
+---
+
+## 2. Coleta e Pré-Processamento de Dados
+
+### 2.1. Aquisição e Consolidação de Dados
+
+O Notebook inicia a fase de coleta de dados da ONS para cada ano (2000 a 2025):  
+
+- **Energia Natural Afluente (ENA) Diária por Bacia**: Arquivos CSV, que fornecem informações sobre o fluxo de energia (vazão) que chega às bacias hidrográficas.  
+- **Energia Armazenada (EAR) Diária por Reservatório**: Arquivos Parquet, contendo os níveis de armazenamento específicos de cada reservatório.  
+
+Os arquivos baixados são validados quanto ao tamanho (evitando arquivos vazios) e concatenados em dois DataFrames principais: `df_ENA` e `df_EAR`.
+
+---
+
+### 2.2. Limpeza, Tipagem e Junção de Dados
+
+Etapas realizadas:  
+
+- **Conversão de Datas:** As colunas `ena_data` e `ear_data` são convertidas para o formato `datetime`.  
+- **Tipagem Numérica:** Colunas numéricas em `df_EAR` (como `ear_reservatorio_subsistema_*` e `val_contribear_*`) são convertidas para *float*, utilizando `errors='coerce'` para tratar valores não numéricos como `NaN`.  
+- **Merge:** Os dois DataFrames são mesclados (`pd.merge`) em uma junção interna (`how='inner'`), utilizando a data e o nome da bacia (`nom_bacia`) como chaves, resultando no DataFrame `df_merged`.  
+- **Ajuste Final:** Colunas redundantes (`data_ear`, `cod_resplanejamento`) são removidas, e a coluna de data é definida como o índice principal do DataFrame.  
+
+---
+
+### 2.3. Agregação Temporal para Análise (Mensal)
+
+Para análise com modelos estatísticos (ARIMA/SARIMAX), os dados diários são convertidos para frequência mensal:  
+
+- **Valores Numéricos:** Calculada a média mensal.  
+- **Variáveis Categóricas:** Preservado o primeiro valor do mês.  
+
+---
+
+## 3. Análise de Séries Temporais (Modelos Estatísticos)
+
+### 3.1. Estacionariedade e Decomposição
+
+- **Filtragem de Séries:** Apenas séries temporais sem valores ausentes (`NaN`) são mantidas.  
+- **Visualização de Padrões:** Gráficos de Média Móvel e Desvio Padrão Móvel verificam visualmente a estacionariedade.  
+- **Decomposição Sazonal:** Aplicação da função `seasonal_decompose` (modelo aditivo, período = 12) para extrair **Tendência, Sazonalidade e Resíduo**.  
+- **ACF e PACF:** Gráficos de Autocorrelação e Autocorrelação Parcial para definição empírica de parâmetros `p` e `q`.  
+
+---
+
+### 3.2. Determinação da Diferenciação (d)
+
+O Teste Aumentado de Dickey-Fuller (ADF) é utilizado para determinar o número de diferenciações necessárias (`d = 0, 1 ou 2`).  
+
+---
+
+### 3.3. Modelagem ARIMA e SARIMA
+
+- **Divisão de Dados:** Treino (70%), Validação (10%), Teste (20%).  
+- **Ajuste:**  
+  - ARIMA: diferenciação manual aplicada antes do ajuste, previsões reintegradas para a escala original.  
+  - SARIMA: tratamento interno da diferenciação e ordens sazonais (`P,D,Q,s`) com `s=12` (sazonalidade anual).  
+- **Métricas:** Avaliação com **MSE, RMSE, R² e MAPE**.  
+- **Saída:** Arquivos CSV com previsões de teste para cada reservatório.  
+
+---
+
+## 4. Modelagem Preditiva com LightGBM
+
+### 4.1. Engenharia Avançada de Features (Diária)
+
+- **Features Temporais:** Ano, mês, dia, dia da semana, trimestre + representações cíclicas (seno/cosseno).  
+- **Lags e Rolamentos:** Defasagens de 1, 7 e 30 dias + estatísticas móveis (média e desvio padrão em janelas de 7 e 30 dias).  
+- **Codificação Categórica:** Uso de *Target Encoder* para variáveis de alta cardinalidade (`nom_reservatorio`).  
+- **Features Agregadas:** Variáveis com média do target por bacia ou subsistema no mesmo dia.  
+
+---
+
+### 4.2. Treinamento e Avaliação do LightGBM
+
+- **Modelo:** `LGBMRegressor`, escolhido pela eficiência e suporte a colunas categóricas.  
+- **Validação Temporal:** `TimeSeriesSplit` com 5 folds sequenciais.  
+- **Importância de Features:** Avaliação de importância pelo critério *gain*.  
+
+---
+
+### 4.3. Exportação e Resultados Finais
+
+- Modelo final exportado como `lgbm_model.pkl`.  
+- Geração do arquivo CSV: `previsoes_teste_todos_reservatorios_todos_anos.csv`.  
+- Colunas do CSV: `data, nom_reservatorio, valor_real, valor_previsto, erro_absoluto, erro_percentual`.  
+- Visualização: gráfico de desempenho em um reservatório de exemplo.  
+
+---
 
 
