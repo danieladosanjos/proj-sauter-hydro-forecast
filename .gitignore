@@ -1,0 +1,16 @@
+# Terraform 
+*.tfstate 
+*.tfstate.*   
+.terraform/ 
+.terraform.lock.hcl 
+terraform-key.json 
+ 
+# Python 
+__pycache__/ 
+*.py[cod] 
+.env 
+venv/ 
+ 
+# IDE 
+.vscode/ 
+.idea/ 
