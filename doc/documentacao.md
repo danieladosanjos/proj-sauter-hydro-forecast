@@ -456,3 +456,113 @@ A tabela TRUSTED é a base para o consumo de dados e pode ser otimizada para des
 
 A Cloud Function, como orquestrador, pode ser aprimorada em termos de segurança, resiliência e monitoramento. A implementação de mecanismos de autenticação e autorização é crucial, como restringir o acesso via Cloud IAM, colocar um API Gateway na frente da função, ou usar tokens de ID para invocações internas. Para procedimentos BigQuery que podem levar um tempo considerável, uma melhoria seria iniciar o job do BigQuery de forma assíncrona e retornar imediatamente um `job_id` para o cliente, liberando a Cloud Function rapidamente. Além do logging básico, integrar a função com o Cloud Monitoring para criar métricas personalizadas e configurar alertas baseados nessas métricas. Evitar o *hardcoding* de valores como `project_dataset_procedure` utilizando variáveis de ambiente, tornando a função mais flexível e segura. Desenvolver testes unitários e de integração para a lógica da Cloud Function, utilizando *mocks* para simular as interações com o cliente BigQuery. Para automação diária, configurar um job no Cloud Scheduler que invoque a Cloud Function via HTTP. Por fim, uma validação mais rigorosa do formato da data (se fornecida) poderia ser implementada para evitar que datas mal formatadas cheguem ao BigQuery e causem erros no procedimento armazenado.
 
+
+# 📊 Projeto: Sauter University 2025 Challenge
+**Autor:** *Marcos Venício Silva do Nascimento*  
+**Função:** Analista de Dados  
+
+---
+
+## 📌 Visão Geral do Projeto
+O projeto foi desenvolvido por uma equipe multidisciplinar composta por **Engenheiros de Dados, DevOps, Infraestrutura e Machine Learning**, cobrindo toda a pipeline de dados.  
+
+O objetivo central foi **tratar, analisar e disponibilizar dados do ONS (Operador Nacional do Sistema Elétrico)** sobre a **Energia Natural Afluente (ENA) em reservatórios hidrelétricos**, permitindo **análises estatísticas, preditivas e a construção de dashboards interativos** para suporte à tomada de decisão.  
+
+Como Analista de Dados, minha atuação concentrou-se em:
+- **Exploração e limpeza dos dados (Data Wrangling).**
+- **Análise estatística e visualização de tendências.**
+- **Tratamento de valores nulos e padronização de colunas.**
+- **Integração e unificação de múltiplos arquivos CSV (2020–2025).**
+- **Construção de dashboards interativos no Looker Studio.**
+
+Ambiente de desenvolvimento:
+- **Google Cloud Platform (GCP)**  
+- **Google Colab** para processamento e análise exploratória.  
+- **Looker Studio** para visualização e dashboards.  
+
+---
+
+## 🔄 Pipeline de Dados
+1. **Ingestão**: Arquivos CSV anuais (2020–2025) foram importados e unificados.  
+2. **Tratamento**:  
+   - Conversão de datas para formato `datetime`.  
+   - Padronização dos nomes de colunas (`snake_case`).  
+   - Preenchimento de valores nulos com **mediana (numéricos)** e **moda (categóricos)**.  
+   - Remoção de colunas redundantes.  
+3. **Análise Exploratória**:  
+   - Tendências mensais por subsistema.  
+   - Sazonalidade da ENA bruta e armazenável.  
+   - Máximos anuais por bacia hidrográfica.  
+   - Distribuição estatística por boxplots.  
+4. **Exportação**: Dados limpos foram salvos em `.csv` e `.xlsx` para integração no pipeline confiável.  
+5. **Visualização**: Criação de dashboards interativos no **Looker Studio**.  
+
+---
+
+## 🧑‍💻 Principais Contribuições (com código documentado)
+
+### 1. Unificação dos Arquivos (2020–2025)
+```python
+dfs = [pd.read_csv(arq, sep=";", encoding="utf-8") for arq in arquivos]
+df = pd.concat(dfs, ignore_index=True)
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+df["ena_data"] = pd.to_datetime(df["ena_data"], errors="coerce")
+df.to_csv("ENA_DIARIO_RESERVATORIOS_2020_2025.csv", sep=";", encoding="utf-8", index=False)
+```
+
+### 2. Tratamento de Valores Nulos
+```python
+numeric_cols_with_nulls = df.select_dtypes(include=['number']).columns[df.isnull().any()]
+for col in numeric_cols_with_nulls:
+    median_val = df[col].median()
+    df[col] = df[col].fillna(median_val)
+
+mode_nom_ree = df['nom_ree'].mode()[0]
+df['nom_ree'] = df['nom_ree'].fillna(mode_nom_ree)
+```
+
+### 3. Tendência Mensal por Subsistema
+```python
+df["mes_ano"] = df["ena_data"].dt.to_period("M")
+monthly_ena = df.groupby(["mes_ano", "nom_subsistema"])["ena_bruta_res_mwmed"].mean().reset_index()
+monthly_ena["mes_ano"] = monthly_ena["mes_ano"].dt.to_timestamp()
+
+sns.lineplot(data=monthly_ena, x="mes_ano", y="ena_bruta_res_mwmed", hue="nom_subsistema")
+```
+
+### 4. Máximos Anuais por Bacia Hidrográfica
+```python
+df['ano'] = df['ena_data'].dt.year
+max_ena_anual_por_bacia = df.groupby(['nom_bacia', 'ano'])[['ena_bruta_res_mwmed','ena_armazenavel_res_mwmed']].max()
+mean_max_ena_por_bacia = max_ena_anual_por_bacia.groupby('nom_bacia').mean().reset_index()
+```
+
+### 5. Exportação para Integração
+```python
+df.to_csv('ena_trusted_cleaned_final.csv', index=False)
+```
+
+---
+
+## 📈 Dashboard no Looker Studio
+- Visualizações desenvolvidas:  
+  - **Evolução temporal da ENA Bruta e Armazenável por Bacia.**  
+  - **Comparação entre subsistemas.**  
+  - **Sazonalidade média anual.**  
+  - **Distribuição estatística (boxplots).**  
+- Acesso: *(inserir link se aplicável)*  
+
+---
+
+## ✅ Resultados Obtidos
+- Dataset confiável e unificado para todo o período **2020–2025**.  
+- Redução de inconsistências via tratamento de nulos.  
+- Geração de insights sobre **sazonalidade, máximos anuais e variações por subsistema**.  
+- Dashboard interativo permitindo análise dinâmica por gestores e pesquisadores.  
+
+---
+
+## 🚀 Conclusão
+Minha participação como **Analista de Dados** foi essencial para **transformar dados brutos do ONS em informação estratégica**, integrando a pipeline de ponta a ponta, desde ingestão até visualização no Looker Studio.  
+
+
